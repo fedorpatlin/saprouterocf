@@ -38,3 +38,6 @@ func Check_binary(exefile string) {
 		os.Exit(ocf_const.OCF_ERR_INSTALLED)
 	}
 }
+
+func Ocf_run()
+func Ocf_is_true()
