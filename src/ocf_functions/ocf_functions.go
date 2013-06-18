@@ -16,13 +16,13 @@ const (
 	OCF_CRIT  = "crit"
 )
 
-var Ocf_logger *ocf_logging.Generic_logger
+var Ocf_logger ocf_logging.Logger
 
 func Ocf_log(severity string, message string) {
 	if Ocf_logger == nil {
 		Ocf_logger = new(ocf_logging.Generic_logger)
 	}
-	ocf_logging.Ocf_log_backend(*Ocf_logger, severity, message)
+	ocf_logging.Ocf_log_backend(Ocf_logger, severity, message)
 }
 
 func Have_binary(exefile string) int {
