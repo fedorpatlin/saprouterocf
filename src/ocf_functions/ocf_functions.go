@@ -39,5 +39,19 @@ func Check_binary(exefile string) {
 	}
 }
 
-func Ocf_run()
-func Ocf_is_true()
+func Ocf_run(severity string, quiet bool, command string, params string) int {
+	cmd := exec.Command(command, params)
+	err := cmd.Run()
+	if err != nil {
+		Ocf_log(OCF_ERR, err.Error())
+		return 3
+	}
+	out, err := cmd.CombinedOutput()
+	if err == nil {
+		Ocf_log("info", string(out))
+	}
+	Ocf_log(OCF_ERR, err.Error())
+	return 0
+}
+
+func Ocf_is_true() {}
