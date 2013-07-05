@@ -1,4 +1,4 @@
-package ocf_const
+package main
 
 //API return codes
 const (
