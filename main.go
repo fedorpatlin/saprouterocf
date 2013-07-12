@@ -20,14 +20,13 @@ func saprouter_start() int {
 	Ocf_log(OCF_INFO, "starting saprouter process")
 	rc := run_service("-r")
 	if rc != OCF_SUCCESS {
-		Ocf_log(OCF_ERR, "starting saprouter process failed, code %d", rc)
+		Ocf_log(OCF_ERR, "starting saprouter process failed, code "+string(rc))
 		return OCF_ERR_GENERIC
 	}
 	status := saprouter_monitor()
 	for status != OCF_SUCCESS {
 		time.Sleep(1 * time.Second)
 		status = saprouter_monitor()
-
 	}
 	Ocf_log(OCF_INFO, "saprouter process is working")
 	return status
@@ -57,9 +56,10 @@ func saprouter_metadata() int {
 
 func saprouter_monitor() int {
 	//verify_all()
-	rc := run_service("-L")
-	Ocf_log(OCF_ERR, string(rc))
-	if rc == 0 {
+	rc1 := run_service("-L")
+	rc2 := check_port(get_param("host"), get_param("port"))
+	Ocf_log(OCF_ERR, string(rc1))
+	if rc1 == 0 {
 		return OCF_SUCCESS
 	} else {
 		return OCF_NOT_RUNNING
@@ -150,6 +150,11 @@ var metadata_xml = `<?xml version="1.0"?>
 			<longdesc lang="en"> the full path to a trace file</longdesc>
 			<shortdesc>Trace file</shortdesc>
 			<content type="string" default="/var/log/saprouter/saprouter.trc"/>
+		</parameter>
+		<parameter name="host" required="1" unique="0">
+			<longdesc lang="en">host name or IP address</longdesc>
+			<shortdesc>host</shortdesc>
+			<content type="string" default="localhost"/>
 		</parameter>
 		<parameter name="port" required="1" unique="0">
 			<longdesc lang="en">Port number</longdesc>

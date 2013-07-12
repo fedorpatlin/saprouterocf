@@ -2,6 +2,7 @@
 package main
 
 import (
+	"net"
 	"ocf_logging"
 	"os"
 	"os/exec"
@@ -43,9 +44,13 @@ func Ocf_run(severity string, quiet bool, command string, params string) int {
 	_, err := cmd.CombinedOutput()
 	if err != nil {
 		Ocf_log(severity, err.Error())
-		return 3
+		return OCF_ERR_INSTALLED
 	}
-	return 0
+	return OCF_SUCCESS
 }
 
 func Ocf_is_true() {}
+
+func check_port(host, port string) int {
+	return OCF_SUCCESS
+}
