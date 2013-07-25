@@ -2,18 +2,11 @@
 package main
 
 import (
-	"net"
+	//	"net"
 	"ocf_logging"
 	"os"
 	"os/exec"
-)
-
-const (
-	OCF_DEBUG = "debug"
-	OCF_INFO  = "info"
-	OCF_WARN  = "warn"
-	OCF_ERR   = "err"
-	OCF_CRIT  = "crit"
+	"syscall"
 )
 
 var Ocf_logger ocf_logging.Logger
@@ -32,21 +25,35 @@ func Have_binary(exefile string) int {
 	}
 	return OCF_SUCCESS
 }
-func Check_binary(exefile string) {
+func Check_binary(exefile string) int {
 	_, err := exec.LookPath(exefile)
 	if err != nil {
-		os.Exit(OCF_ERR_INSTALLED)
-	}
-}
-
-func Ocf_run(severity string, quiet bool, command string, params string) int {
-	cmd := exec.Command(command, params)
-	_, err := cmd.CombinedOutput()
-	if err != nil {
-		Ocf_log(severity, err.Error())
 		return OCF_ERR_INSTALLED
 	}
 	return OCF_SUCCESS
+}
+
+func ocf_run(severity string, quiet bool, binary string, command string) int {
+	cmd := exec.Command(binary, command)
+	if err := cmd.Run(); err != nil {
+		Ocf_log(OCF_CRIT, err.Error())
+		return OCF_ERR_INSTALLED
+	}
+
+	syscall.Setsid()
+	return OCF_SUCCESS
+}
+
+func ocf_daemon(daemon func() int) int {
+	syscall.Umask(27)
+	if err := daemon(); err > OCF_SUCCESS {
+		return OCF_ERR_GENERIC
+	}
+	os.Stdin.Close()
+	os.Stdout.Close()
+	os.Stderr.Close()
+	syscall.Setsid()
+	return (OCF_SUCCESS)
 }
 
 func Ocf_is_true() {}
