@@ -85,8 +85,22 @@ func saprouter_monitor() int {
 func dispatch() {
 	cmd := os.Getenv("__OCF_ACTION")
 	if cmd == "" {
-		cmd = "meta-data"
+		if os.Getenv("OCF_RESKEY_ocf-action") != "" {
+			cmd = os.Getenv("OCF_RESKEY_ocf-action")
+		} else {
+			if len(os.Args) < 2 {
+				Ocf_log(OCF_DEBUG, "saprouter action not set "+cmd)
+				for _, v := range os.Environ() {
+					Ocf_log(OCF_DEBUG, v)
+				}
+				saprouter_metadata()
+				os.Exit(OCF_ERR_UNIMPLEMENTED)
+			} else {
+				cmd = os.Args[1]
+			}
+		}
 	}
+	Ocf_log(OCF_DEBUG, "saprouter operation: "+cmd)
 	switch cmd {
 	case "meta-data":
 		os.Exit(saprouter_metadata())
