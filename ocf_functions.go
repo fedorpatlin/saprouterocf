@@ -19,8 +19,12 @@ func Ocf_log(severity string, message string) {
 }
 
 func Have_binary(exefile string) int {
-	_, err := exec.LookPath(exefile)
-	if err != nil {
+	if cb := Check_binary(exefile); cb != OCF_SUCCESS {
+		return cb
+	}
+	finfo, _ := os.Stat(exefile)
+
+	if (finfo.Mode() | 0111) != 0 {
 		return OCF_ERR_INSTALLED
 	}
 	return OCF_SUCCESS

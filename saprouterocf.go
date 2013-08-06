@@ -90,9 +90,9 @@ func dispatch() {
 		} else {
 			if len(os.Args) < 2 {
 				Ocf_log(OCF_DEBUG, "saprouter action not set "+cmd)
-				for _, v := range os.Environ() {
-					Ocf_log(OCF_DEBUG, v)
-				}
+				//				for _, v := range os.Environ() {
+				//					Ocf_log(OCF_DEBUG, v)
+				//				}
 				saprouter_metadata()
 				os.Exit(OCF_ERR_UNIMPLEMENTED)
 			} else {
@@ -121,7 +121,7 @@ func dispatch() {
 }
 
 func verify_all() int {
-	return Check_binary(get_param("binary"))
+	return Have_binary(get_param("binary"))
 }
 
 /** returns value of corresponding environment variable, or empty string
