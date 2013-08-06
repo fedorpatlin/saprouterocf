@@ -10,6 +10,18 @@ const (
 	SAPROUTER_TRACE  = "/var/log/saprouter.trc"
 )
 
+//option_names
+const (
+	OPTION_ROUTTAB   = "-R"
+	OPTION_LOG       = "-G"
+	OPTION_TRACE     = "-T"
+	OPTION_RUN       = "-r"
+	OPTION_RELOAD    = "-"
+	OPTION_STOP      = "-s"
+	OPTION_NODNS     = "-D"
+	OPTION_NOUSERTRC = "-Z"
+)
+
 //API return codes
 const (
 	OCF_SUCCESS           = 0

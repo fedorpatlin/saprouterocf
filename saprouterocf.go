@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+var args = []string{OPTION_ROUTTAB, SAPROUTER_CONFIG, OPTION_LOG, SAPROUTER_LOG, OPTION_TRACE, SAPROUTER_TRACE}
+
 //Operations start, stop, meta-data and monitor for minimal OCF implementation
 
 //must start as daemon, asynchronously
@@ -24,7 +26,7 @@ func saprouter_start() int {
 		Ocf_log(OCF_INFO, "service already running")
 		return OCF_SUCCESS
 	}
-	cmd := func() int { return run_service("start") }
+	cmd := func() int { return run_service(args) }
 
 	if err := ocf_daemon(cmd); err == OCF_SUCCESS {
 		Ocf_log(OCF_DEBUG, "service executed")
@@ -45,7 +47,7 @@ func saprouter_stop() int {
 	if st := saprouter_monitor(); st != OCF_SUCCESS {
 		return OCF_SUCCESS
 	}
-	if st := run_service("stop"); st != OCF_SUCCESS {
+	if st := run_service(args); st != OCF_SUCCESS {
 		Ocf_log(OCF_ERR, "Can't stop service")
 		return OCF_ERR_GENERIC
 	}
@@ -57,7 +59,7 @@ func saprouter_reload() int {
 	if st := saprouter_monitor(); st != OCF_SUCCESS {
 		return OCF_NOT_RUNNING
 	}
-	if st := run_service("restart"); st == OCF_SUCCESS {
+	if st := run_service(args); st == OCF_SUCCESS {
 		Ocf_log(OCF_INFO, "service reloaded")
 		return OCF_SUCCESS
 	}
@@ -73,7 +75,7 @@ func saprouter_metadata() int {
 func saprouter_monitor() int {
 	verify_all()
 	Ocf_log(OCF_DEBUG, "geting service status")
-	if st := run_service("status"); st == OCF_SUCCESS {
+	if st := run_service(args); st == OCF_SUCCESS {
 		Ocf_log(OCF_DEBUG, "rc is "+string(st))
 		return OCF_SUCCESS
 	} else {
@@ -155,7 +157,7 @@ func init_me() {
 	set_param_default("trace", SAPROUTER_TRACE)
 }
 
-func run_service(args ...string) int {
+func run_service(args []string) int {
 	//	Ocf_log(OCF_INFO, "current command is "+command)
 	err := ocf_run(OCF_INFO, false, get_param("binary"), args...)
 	return err
