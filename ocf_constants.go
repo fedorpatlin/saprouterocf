@@ -2,7 +2,7 @@ package main
 
 //defaults
 const (
-	SAPROUTER_BINARY = "/etc/init.d/saprouter"
+	SAPROUTER_BINARY = "saprouter"
 	SAPROUTER_CONFIG = "/etc/saprouter/saprouttab"
 	SAPROUTER_HOST   = "localhost"
 	SAPROUTER_PORT   = "3299"

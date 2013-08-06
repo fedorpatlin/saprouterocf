@@ -37,8 +37,8 @@ func Check_binary(exefile string) int {
 	return OCF_SUCCESS
 }
 
-func ocf_run(severity string, quiet bool, binary string, command string) int {
-	cmd := exec.Command(binary, command)
+func ocf_run(severity string, quiet bool, binary string, params ...string) int {
+	cmd := exec.Command(binary, params...)
 	if err := cmd.Run(); err != nil {
 		Ocf_log(OCF_CRIT, err.Error())
 		return OCF_ERR_INSTALLED

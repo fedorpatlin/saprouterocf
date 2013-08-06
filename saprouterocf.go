@@ -155,9 +155,9 @@ func init_me() {
 	set_param_default("trace", SAPROUTER_TRACE)
 }
 
-func run_service(command string) int {
-	Ocf_log(OCF_INFO, "current command is "+command)
-	err := ocf_run(OCF_INFO, false, get_param("binary"), command)
+func run_service(args ...string) int {
+	//	Ocf_log(OCF_INFO, "current command is "+command)
+	err := ocf_run(OCF_INFO, false, get_param("binary"), args...)
 	return err
 }
 
