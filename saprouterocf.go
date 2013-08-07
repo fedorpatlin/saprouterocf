@@ -26,7 +26,7 @@ func saprouter_start() int {
 		Ocf_log(OCF_INFO, "service already running")
 		return OCF_SUCCESS
 	}
-	cmd := func() int { return run_service(args) }
+	cmd := func() int { return run_service(append(args, CMD_RUN)...) }
 
 	if err := ocf_daemon(cmd); err == OCF_SUCCESS {
 		Ocf_log(OCF_DEBUG, "service executed")
@@ -47,7 +47,7 @@ func saprouter_stop() int {
 	if st := saprouter_monitor(); st != OCF_SUCCESS {
 		return OCF_SUCCESS
 	}
-	if st := run_service(args); st != OCF_SUCCESS {
+	if st := run_service(append(args, CMD_STOP)...); st != OCF_SUCCESS {
 		Ocf_log(OCF_ERR, "Can't stop service")
 		return OCF_ERR_GENERIC
 	}
@@ -56,18 +56,17 @@ func saprouter_stop() int {
 }
 
 func saprouter_reload() int {
+	verify_all()
 	if st := saprouter_monitor(); st != OCF_SUCCESS {
 		return OCF_NOT_RUNNING
 	}
-	if st := run_service(args); st == OCF_SUCCESS {
-		Ocf_log(OCF_INFO, "service reloaded")
-		return OCF_SUCCESS
-	}
-	return OCF_ERR_GENERIC
+	saprouter_stop()
+
+	return saprouter_start()
 }
 
 func saprouter_metadata() int {
-	//	verify_all()
+	verify_all()
 	fmt.Printf("%s\n", METADATA_XML)
 	return OCF_SUCCESS
 }
@@ -75,7 +74,7 @@ func saprouter_metadata() int {
 func saprouter_monitor() int {
 	verify_all()
 	Ocf_log(OCF_DEBUG, "geting service status")
-	if st := run_service(args); st == OCF_SUCCESS {
+	if st := run_service(append(args, CMD_STATUS)...); st == OCF_SUCCESS {
 		Ocf_log(OCF_DEBUG, "rc is "+string(st))
 		return OCF_SUCCESS
 	} else {
@@ -157,7 +156,7 @@ func init_me() {
 	set_param_default("trace", SAPROUTER_TRACE)
 }
 
-func run_service(args []string) int {
+func run_service(args ...string) int {
 	//	Ocf_log(OCF_INFO, "current command is "+command)
 	err := ocf_run(OCF_INFO, false, get_param("binary"), args...)
 	return err

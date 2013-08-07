@@ -10,16 +10,48 @@ const (
 	SAPROUTER_TRACE  = "/var/log/saprouter.trc"
 )
 
-//option_names
+/*saprouter options
+-R routtab   : name of route-permission-file  (default ./saprouttab)
+-G logfile   : name of log file               (default no logging)
+-T tracefile : name of trace file             (default dev_rout)
+-V tracelev  : trace level to run with        (default 1)
+-H hostname  : of running SAProuter           (default localhost)
+-S service   : service-name / number          (default 3299)
+-P infopass  : password for info requests
+-C clients   : maximum no of clients          (default 800)
+-Y servers   : maximum no of servers to start (default 1)
+-K [myname]  : activate SNC; if given, use 'myname' as own sec-id
+-A initstring: initialization options for third-party library
+-D           : switch DNS reverse lookup off
+-E           : append log- and trace-files to existing
+-J filesize  : maximum log file size in byte  (default off)
+-6           : IPv6 enabled
+-Z           : hide connect error information for clients
+*/
 const (
 	OPTION_ROUTTAB   = "-R"
 	OPTION_LOG       = "-G"
 	OPTION_TRACE     = "-T"
-	OPTION_RUN       = "-r"
-	OPTION_RELOAD    = "-"
-	OPTION_STOP      = "-s"
 	OPTION_NODNS     = "-D"
 	OPTION_NOUSERTRC = "-Z"
+)
+
+/*saprouter commands
+*start router : saprouter -r
+*stop router  : saprouter -s
+soft shutdown: saprouter -p
+*router info  : saprouter -l (-L)
+*new routtab  : saprouter -n
+toggle trace : saprouter -t
+cancel route : saprouter -c id
+dump buffers : saprouter -d
+flush   "    : saprouter -f
+hide errInfo : saprouter -z
+*/
+const (
+	CMD_RUN    = "-r"
+	CMD_STOP   = "-s"
+	CMD_STATUS = "-l"
 )
 
 //API return codes
