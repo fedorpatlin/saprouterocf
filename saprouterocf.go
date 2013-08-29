@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-var args = []string{OPTION_ROUTTAB, SAPROUTER_CONFIG, OPTION_LOG, SAPROUTER_LOG, OPTION_TRACE, SAPROUTER_TRACE}
+//var args = []string{OPTION_ROUTTAB, get_param("config"), OPTION_LOG, get_param("log"), OPTION_TRACE, get_param("trace")}
 
 //Operations start, stop, meta-data and monitor for minimal OCF implementation
 
@@ -26,9 +26,8 @@ func saprouter_start() int {
 		Ocf_log(OCF_INFO, "service already running")
 		return OCF_SUCCESS
 	}
-	cmd := func() int { return run_service(append(args, CMD_RUN)...) }
 
-	if err := ocf_daemon(cmd); err == OCF_SUCCESS {
+	if err := run_service(CMD_RUN, true); err == nil {
 		Ocf_log(OCF_DEBUG, "service executed")
 		for {
 			if err := saprouter_monitor(); err != OCF_SUCCESS {
@@ -47,7 +46,7 @@ func saprouter_stop() int {
 	if st := saprouter_monitor(); st != OCF_SUCCESS {
 		return OCF_SUCCESS
 	}
-	if st := run_service(append(args, CMD_STOP)...); st != OCF_SUCCESS {
+	if st := run_service(CMD_STOP, false); st != nil {
 		Ocf_log(OCF_ERR, "Can't stop service")
 		return OCF_ERR_GENERIC
 	}
@@ -74,10 +73,10 @@ func saprouter_metadata() int {
 func saprouter_monitor() int {
 	verify_all()
 	Ocf_log(OCF_DEBUG, "geting service status")
-	if st := run_service(append(args, CMD_STATUS)...); st == OCF_SUCCESS {
-		Ocf_log(OCF_DEBUG, "rc is "+string(st))
+	if st := run_service(CMD_STATUS, false); st == nil {
 		return OCF_SUCCESS
 	} else {
+		Ocf_log(OCF_DEBUG, "rc is "+st.Error())
 		return OCF_NOT_RUNNING
 	}
 	return OCF_ERR_GENERIC
@@ -156,9 +155,26 @@ func init_me() {
 	set_param_default("trace", SAPROUTER_TRACE)
 }
 
-func run_service(args ...string) int {
+func run_service(command string, async bool) error {
+	var args = []string{OPTION_ROUTTAB, get_param("config"), OPTION_LOG, get_param("log"), OPTION_TRACE, get_param("trace")}
+
 	//	Ocf_log(OCF_INFO, "current command is "+command)
-	err := ocf_run(OCF_INFO, false, get_param("binary"), args...)
+	var err error = nil
+
+	if async {
+		a := append(args, command)
+		fmt.Println("async call of: " + get_param("binary"))
+		fmt.Print(a)
+		fmt.Println()
+		err = ocf_daemon(get_param("binary"), a...)
+	} else {
+		a := append(args, command)
+		fmt.Print(a)
+		fmt.Println()
+
+		err = ocf_run(get_param("binary"), a...)
+	}
+
 	return err
 }
 

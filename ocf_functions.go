@@ -19,45 +19,53 @@ func Ocf_log(severity string, message string) {
 }
 
 func Have_binary(exefile string) int {
-	if cb := Check_binary(exefile); cb != OCF_SUCCESS {
+	pth, cb := Check_binary(exefile)
+	if cb != OCF_SUCCESS {
 		return cb
 	}
-	finfo, _ := os.Stat(exefile)
-
+	finfo, err := os.Stat(pth)
+	if err != nil {
+		return OCF_ERR_INSTALLED
+	}
 	if (finfo.Mode() | 0111) != 0 {
 		return OCF_ERR_INSTALLED
 	}
 	return OCF_SUCCESS
 }
-func Check_binary(exefile string) int {
-	_, err := exec.LookPath(exefile)
+func Check_binary(exefile string) (string, int) {
+	path, err := exec.LookPath(exefile)
 	if err != nil {
-		return OCF_ERR_INSTALLED
+		return "", OCF_ERR_INSTALLED
 	}
-	return OCF_SUCCESS
+	return path, OCF_SUCCESS
 }
 
-func ocf_run(severity string, quiet bool, binary string, params ...string) int {
+func ocf_run(binary string, params ...string) error {
 	cmd := exec.Command(binary, params...)
-	if err := cmd.Run(); err != nil {
-		Ocf_log(OCF_CRIT, err.Error())
-		return OCF_ERR_INSTALLED
-	}
-
-	syscall.Setsid()
-	return OCF_SUCCESS
+	return cmd.Run()
 }
 
-func ocf_daemon(daemon func() int) int {
+func ocf_daemon(binary string, params ...string) error {
 	syscall.Umask(27)
-	if err := daemon(); err > OCF_SUCCESS {
-		return OCF_ERR_GENERIC
-	}
-	os.Stdin.Close()
+
+	nulldev, _ := os.Open("/dev/null")
+	cmd := exec.Command(binary, params...)
+
+	err := cmd.Start()
+
+	syscall.Dup2(int(nulldev.Fd()), int(os.Stdout.Fd()))
+	syscall.Dup2(int(nulldev.Fd()), int(os.Stderr.Fd()))
+	syscall.Dup2(int(nulldev.Fd()), int(os.Stdin.Fd()))
+
 	os.Stdout.Close()
+	os.Stdin.Close()
 	os.Stderr.Close()
-	syscall.Setsid()
-	return (OCF_SUCCESS)
+
+	if _, err1 := syscall.Setsid(); err1 != nil {
+		Ocf_log(OCF_INFO, "Oops! "+err1.Error())
+		os.Exit(255)
+	}
+	return err
 }
 
 func Ocf_is_true() {}
